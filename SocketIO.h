@@ -3,7 +3,7 @@
 #ifndef SOCKETIO_H_
 #define SOCKETIO_H_
 
-#define RECV_BUFFER_SIZE 1024
+#define MSG_SIZE 1024
 
 
 #include <sys/socket.h>
@@ -12,6 +12,7 @@
 #include <cstring>
 #include <arpa/inet.h>
 #include <chrono>
+#include <map>
 
 
 using namespace std;
@@ -19,28 +20,59 @@ using namespace std;
 class TCPMessage {
 
     private:
-        char* message;
-        char* sender_ip;
-        int sender_port;
+        map<string, double> dict;
 
     public:
-        TCPMessage(char* data, char* sender_ip, int sender_port) {
-            this->message = data;
-            this->sender_ip = sender_ip;
-            this->sender_port = sender_port;
+        TCPMessage(map<string, double> data) {
+            this->dict = data;
         }
 
-        char* data() {
-            return this->message;
+        map<string,double> data() {
+            return this->dict;
         }
 
-        char* ip() {
-            return this->sender_ip;
-        } 
-
-        int port() {
-            return this->sender_port;
+        static string toString(map<string,double> dict) {
+            string out = "";
+            for(auto pair : dict) {
+                out += pair.first + "," + to_string(pair.second) + ";";
+            }
+            return out;
         }
+
+        static map<string,double> toMap(string dictString) {
+            map<string,double> out;
+            string nameBuffer = "";
+            string valBuffer = "";
+            bool nameReadFlag = false;
+            for(const char c : dictString) {
+                if(c == 0) { //null character for padding
+                    break;
+                }
+                if(!nameReadFlag) {
+                    if(c == ',') {
+                        nameReadFlag = !nameReadFlag;
+                    }
+                    else {
+                        nameBuffer += c;
+                    }
+                }
+                else {
+                    if(c == ';') {
+                        out[nameBuffer] = stod(valBuffer);
+                        nameReadFlag = !nameReadFlag;
+                        nameBuffer = "";
+                        valBuffer = "";
+                    }
+                    else {
+                        valBuffer += c;
+                    }
+                }
+                
+            }
+            return out;
+        }
+
+
 
 
 };
@@ -101,7 +133,7 @@ class TCPListener {
             
             if(this->client <= -1) { throw("No client has connected! Run link() first."); }
             
-            char* buffer = new char[RECV_BUFFER_SIZE];
+            char* buffer = new char[MSG_SIZE];
             int readbytes = 0;
             readbytes = recv(client, buffer, sizeof(buffer), 0);
             if(readbytes <= 0) {
