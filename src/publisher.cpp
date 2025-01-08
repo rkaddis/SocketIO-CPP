@@ -4,7 +4,7 @@
 
 const std::string SERVER_ADDRESS("mqtt://localhost:1883");
 const std::string CLIENT_ID("publisher");
-const std::string TOPIC("test/topic");
+const std::string TOPIC("test");
 const int QOS = 1;
 const int TIMEOUT = 10000;
 

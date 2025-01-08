@@ -3,7 +3,7 @@
 
 const std::string SERVER_ADDRESS("mqtt://localhost:1883");
 const std::string CLIENT_ID("paho_subscriber");
-const std::string TOPIC("test/topic");
+const std::string TOPIC("test");
 const int QOS = 1;
 const int TIMEOUT = 10000;
 
@@ -44,14 +44,14 @@ int main(int argc, char* argv[])
         
         mqtt::token_ptr connectionToken = client.connect(connOpts);
         connectionToken->wait();
-        cout << "here";
+        
         mqtt::token_ptr subToken = client.subscribe(TOPIC, QOS);
         subToken->wait();
-        
+        cout << "Connected" << endl;
         while (true)
         {
             // Wait for messages
-            this_thread::sleep_for(chrono::milliseconds(1000));
+            this_thread::sleep_for(chrono::milliseconds(10));
         }
 
         mqtt::token_ptr disconnectionToken = client.disconnect();
