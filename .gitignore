@@ -1,2 +1,8 @@
 __pycache__/
 .vscode/
+*.cmake
+CMakeFiles/
+CMakeCache.txt
+Makefile
+target/subscriber
+target/publisher
